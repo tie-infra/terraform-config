@@ -27,7 +27,7 @@ jobs:
 
       - name: Run terraform plan
         id: plan
-        run: terraform plan
+        run: terraform plan -no-color
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
 
