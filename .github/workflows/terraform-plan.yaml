@@ -2,6 +2,9 @@ name: Terraform Plan
 on:
   pull_request_target:
 
+concurrency:
+  group: terraform
+
 jobs:
   run:
     name: Run
