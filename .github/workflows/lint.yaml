@@ -30,23 +30,6 @@ jobs:
   terraform-providers:
     name: Terraform Providers
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        platform:
-          - darwin_amd64
-          - darwin_arm64
-          - freebsd_386
-          - freebsd_amd64
-          - freebsd_arm
-          - freebsd_arm64
-          - linux_386
-          - linux_amd64
-          - linux_arm
-          - linux_arm64
-          - windows_386
-          - windows_amd64
-          - windows_arm
     steps:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1.3.2
@@ -60,7 +43,21 @@ jobs:
         run: terraform init -backend=false
 
       - name: Run terraform providers lock
-        run: terraform providers lock -platform=${{ matrix.platform }}
+        run: |
+          terraform providers lock \
+            -platform=darwin_amd64 \
+            -platform=darwin_arm64 \
+            -platform=freebsd_386 \
+            -platform=freebsd_amd64 \
+            -platform=freebsd_arm \
+            -platform=freebsd_arm64 \
+            -platform=linux_386 \
+            -platform=linux_amd64 \
+            -platform=linux_arm \
+            -platform=linux_arm64 \
+            -platform=windows_386 \
+            -platform=windows_amd64 \
+            -platform=windows_arm
 
       - name: Run git diff
         run: git diff --exit-code

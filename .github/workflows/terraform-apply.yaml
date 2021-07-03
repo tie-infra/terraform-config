@@ -5,6 +5,9 @@ on:
     branches:
       - main
 
+concurrency:
+  group: terraform
+
 jobs:
   run:
     name: Run
