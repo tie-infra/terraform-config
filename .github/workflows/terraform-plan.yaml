@@ -31,12 +31,14 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
 
-      - name: Create comment
+      - name: Generate message
         uses: actions/github-script@v4.0.2
+        id: message
         env:
           plan_stdout: ${{ steps.plan.outputs.stdout }}
           plan_outcome: ${{ steps.plan.outcome }}
         with:
+          result-encoding: string
           script: |
             // https://stackoverflow.com/a/30970751/4747401
             function escapeHTML(s) {
@@ -44,7 +46,7 @@ jobs:
                     '&': "&amp;",
                     '"': "&quot;",
                     '<': "&lt;",
-                    '>': "&gt;',
+                    '>': "&gt;",
                 }
                 return s.replace(/[&"<>]/g, (c) => lookup[c])
             }
@@ -52,15 +54,15 @@ jobs:
             const outcome = escapeHTML(process.env.plan_outcome)
             const output = escapeHTML(process.env.plan_stdout)
 
-            const output = `### Terraform
+            return `### Terraform
             <details>
             <summary>terraform plan: ${outcome}</summary>
             <pre>${output}</pre>
             </details>`
 
-            await github.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: output,
-            })
+      - name: Create comment
+        if: ${{ always() && !cancelled() }}
+        uses: marocchino/sticky-pull-request-comment@v2.1.0
+        with:
+          recreate: true
+          message: ${{ steps.message.outputs.result }}
