@@ -53,7 +53,7 @@ jobs:
             }
 
             function escapeCode(s) {
-              return s.replaceAll("\n", "\n    ")
+              return s.replace(/^/gm, "    ")
             }
 
             const outcome = escapeHTML(process.env.plan_outcome)
@@ -63,7 +63,7 @@ jobs:
             <details>
             <summary>terraform plan: ${outcome}</summary>
 
-                ${output}
+            ${output}
             </details>`
 
       - name: Create comment
