@@ -27,7 +27,7 @@ jobs:
 
       - name: Run terraform plan
         id: plan
-        run: terraform plan -no-color 2>&1 | tee plan.txt
+        run: terraform plan -no-color
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
 
@@ -36,12 +36,11 @@ jobs:
         uses: actions/github-script@v4.0.2
         id: message
         env:
+          plan_stdout: ${{ steps.plan.outputs.stdout }}
           plan_outcome: ${{ steps.plan.outcome }}
         with:
           result-encoding: string
           script: |
-            const fs = require('fs')
-
             // https://stackoverflow.com/a/30970751/4747401
             function escapeHTML(s) {
                 const lookup = {
@@ -53,10 +52,19 @@ jobs:
                 return s.replace(/[&"<>]/g, (c) => lookup[c])
             }
 
-            const outcome = escapeHTML(process.env.plan_outcome)
-            const output = escapeHTML(fs.readFileSync("plan.txt", "utf8"))
+            function escapeCode(s) {
+              return s.replaceAll("\n", "\n    ")
+            }
 
-            return `<details><summary>terraform plan: ${outcome}</summary><pre>${output}</pre></details>`
+            const outcome = escapeHTML(process.env.plan_outcome)
+            const output = escapeCode(process.env.plan_stdout)
+
+            return `### Terraform
+            <details>
+            <summary>terraform plan: ${outcome}</summary>
+
+                ${output}
+            </details>`
 
       - name: Create comment
         if: ${{ always() && !cancelled() }}
